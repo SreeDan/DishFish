@@ -3,7 +3,7 @@ const mongoose = require('mongoose');
 const FoodSchema = new mongoose.Schema({
   id: String, 
   name: String,
-  restuarantId: String,
+  restaurantId: String,
   description: String,
   price: Number,
   tag: [Number] // put id's here as reference to tags
