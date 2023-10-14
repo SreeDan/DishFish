@@ -14,6 +14,7 @@ const formidable = require('formidable')
 const jwt = require('jsonwebtoken');
 const uuid4 = require('uuid4');
 const { Restaurant } = require('../models/restaurant');
+const { Food } = require('../models/food');
 var router = express.Router();
 const storage = new Storage(); // GCP Storage
 
@@ -107,9 +108,17 @@ router.post('/food', async (req, res) => {
     var description = req.body.description
     var price = req.body.price
 
-    res.send(200)
+    const newFood = new Food({
+        id: id,
+        name: name,
+        restaurantId: restaurantId,
+        description: description,
+        price: price
+    })
 
-
+    const insertedFood = await newFood.save()
+    console.log(insertedFood)
+    res.send(insertedFood)
 })
 
 
@@ -130,7 +139,6 @@ router.post('/restaurant', async (req, res) => {
         }
     })
 
-    console.log("reached")
 
     const insertedRestaurant = await newRestaurant.save()
     console.log(insertedRestaurant)
@@ -151,7 +159,9 @@ router.post('/signin', async (req, res) => {
         })   
     }
     
-    let authenticated = isCorrectPassword(username, password, user.salt)
+    let authenticated = isCorrectPassword(user.password, password, user.salt)
+
+    console.log(authenticated)
 
     if (!authenticated) {
         return res.status(400).json({

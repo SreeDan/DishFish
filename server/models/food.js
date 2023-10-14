@@ -9,6 +9,6 @@ const FoodSchema = new mongoose.Schema({
   tag: [Number] // put id's here as reference to tags
 })
 
-const User = mongoose.model('User', UserSchema);
+const Food = mongoose.model('Food', FoodSchema);
 
-module.exports =  { User }
+module.exports =  { Food }
