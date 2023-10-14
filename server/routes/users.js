@@ -12,7 +12,8 @@ const formidable = require('formidable')
 
 
 const jwt = require('jsonwebtoken');
-const uuid4 = require('uuid4')
+const uuid4 = require('uuid4');
+const { Restaurant } = require('../models/restaurant');
 var router = express.Router();
 const storage = new Storage(); // GCP Storage
 
@@ -69,6 +70,73 @@ router.get('/', function(req, res) {
     res.send('the user default route');
 });
 
+
+router.get('/food', async (req, res) => {
+    var lat = req.body.latitude
+    var long = req.body.longitude
+    var maxDistance = req.body.maxDistance
+    var budget = req.body.budget
+
+    const restaurants = await Restaurant.find(
+        {
+            location: {
+                $nearSphere: {
+                    $geometry: {
+                        type: 'Point',
+                        coordinates: [lat, long]
+                    },
+                    $maxDistance: maxDistance
+                }
+            }
+        },
+        {
+            id: 1, 
+            _id: 0
+        }
+        ).toArray()
+
+    console.log(restaurants)
+    res.send(200)
+    
+})
+
+router.post('/food', async (req, res) => {
+    const id = uuid4()
+    var name = req.body.name
+    var restaurantId = req.body.restaurantId
+    var description = req.body.description
+    var price = req.body.price
+
+    res.send(200)
+
+
+})
+
+
+router.post('/restaurant', async (req, res) => {
+    var id = req.body.id
+    var name = req.body.name
+    var hours = req.body.hours
+    var long = req.body.long
+    var lat = req.body.lat
+
+    const newRestaurant = new Restaurant({
+        id: id,
+        name: name,
+        hours: hours,
+        location: {
+            type: 'Point',
+            coordinates: [lat, long]
+        }
+    })
+
+    console.log("reached")
+
+    const insertedRestaurant = await newRestaurant.save()
+    console.log(insertedRestaurant)
+    return res.send(201)
+})
+
 router.post('/signin', async (req, res) => {
     var username = req.body.username
     var password = req.body.password
@@ -83,7 +151,7 @@ router.post('/signin', async (req, res) => {
         })   
     }
     
-    let authenticated = isCorrectPassword(user.password, password, user.salt)
+    let authenticated = isCorrectPassword(username, password, user.salt)
 
     if (!authenticated) {
         return res.status(400).json({
