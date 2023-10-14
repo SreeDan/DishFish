@@ -1,14 +1,21 @@
-const { User } = require( '../models/user');
+// import { NextRequest, NextResponse } from 'next/server'
 
+
+const { User } = require( '../models/user');
 // define routes here
 // const connectDB = require('../db/conn')
 const crypto = require('crypto')
 const express = require('express');
 const basicAuth = require('express-basic-auth')
+const {Storage} = require('@google-cloud/storage');
+const formidable = require('formidable')
+
 
 const jwt = require('jsonwebtoken');
 const uuid4 = require('uuid4')
 var router = express.Router();
+const storage = new Storage(); // GCP Storage
+
 
 const cookieConfig = {
     httpOnly: true,
@@ -16,7 +23,6 @@ const cookieConfig = {
     maxAge: 1800,
     signed: false  
 }
-
 
 router.use((req, res, next) => {
     const token = req.cookies.token
@@ -32,6 +38,30 @@ router.use((req, res, next) => {
     }
     next()
 
+})
+
+// router.get('/all', async (req, res) => {
+//     const form = new formidable.IncomingForm();
+//     console.log(form)
+//     const users = await User.find({})
+//     return res.json(users)
+// })
+
+router.post('/upload', async (req, res) => {
+    const form = new formidable.IncomingForm();
+    form.parse(req, (err, fields, files) => {
+        if (err) {
+          res.status(500).json({ error: 'File upload failed.' });
+          return;
+        }
+    
+        // Process the uploaded file (e.g., save it, handle it, etc.)
+        // Access the uploaded file using `files` object.
+        // Example: files.myFile.path
+    
+        res.status(200).json({ success: 'File uploaded successfully.' });
+      });
+    
 })
 
 // Define the home page route
