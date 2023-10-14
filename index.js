@@ -4,6 +4,7 @@ const users = require('./server/routes/users')
 const dotenv = require('dotenv')
 const mongoose = require("mongoose");
 const connectDB = require('./server/db/conn');
+const cookieParser = require('cookie-parser')
 
 dotenv.config()
 const port = 3000
@@ -16,6 +17,7 @@ app.use(
     extended: true,
   }),
 );
+app.use(cookieParser())
 
 // CORS for react
 app.use((req, res, next) => {
