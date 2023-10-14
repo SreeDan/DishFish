@@ -71,13 +71,19 @@ router.get('/', function(req, res) {
     res.send('the user default route');
 });
 
+router.get('/all_food', async (req, res) => {
+    const food = await Food.get({})
+    res.send(food)
+})
 
-router.get('/food', async (req, res) => {
+router.post('/food/get', async (req, res) => {
     var lat = req.body.latitude
     var long = req.body.longitude
     var maxDistance = req.body.maxDistance
     var budget = req.body.budget
 
+    
+    console.log(lat, long)
     const restaurants = await Restaurant.find(
         {
             location: {
@@ -94,10 +100,25 @@ router.get('/food', async (req, res) => {
             id: 1, 
             _id: 0
         }
-        ).toArray()
+        )
 
-    console.log(restaurants)
-    res.send(200)
+
+    var restaurantIds = []
+
+    for (let index = 0; index < restaurants.length; index++) {
+        restaurantIds.push(restaurants[index].id)
+    }
+
+    const allFood = await Food.find(
+        {
+            restaurantId: {
+                $in: restaurantIds
+            },
+            price: { $lte: budget }
+        }
+    )
+
+    res.send(allFood)
     
 })
 
