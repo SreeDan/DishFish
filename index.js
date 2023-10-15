@@ -8,7 +8,7 @@ const cookieParser = require('cookie-parser')
 
 
 dotenv.config()
-const port = 3000
+const port = 8080
 
 var app = express()
 
