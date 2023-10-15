@@ -15,6 +15,8 @@ const { Food } = require('../models/food');
 const path = require('node:path'); 
 var router = express.Router();
 const dotenv = require('dotenv')
+const util = require("util")
+const { PythonShell } = require('python-shell')
 
 dotenv.config()
 
@@ -32,11 +34,19 @@ const cookieConfig = {
     signed: false
 }
 
-router.use((req, res, next) => {
+router.use(async (req, res, next) => {
     const token = req.cookies.token
     
     if (req.originalUrl !== '/api/v1/users/signin' && req.originalUrl !== '/api/v1/users/signup') {
         if (token == null) return res.status(401).send()
+
+        const parsedJWT = await jwt.verify(token, process.env.JWT_TOKEN_KEY)
+
+        const user = await User.findOne({
+            id: parsedJWT.id
+        })
+
+        res.locals.user = user
 
         jwt.verify(token, process.env.JWT_TOKEN_KEY, (err, any) => {
             if (err != null) {
@@ -48,13 +58,9 @@ router.use((req, res, next) => {
 })
 
 router.use('/rest/*', async (req, res, next) => {
-    const token = req.cookies.token
+    // const token = req.cookies.token
 
-    const parsedJWT = await jwt.verify(token, process.env.JWT_TOKEN_KEY)
-
-    const user = await User.findOne({
-        id: parsedJWT.id
-    })
+    const user = res.locals.user
 
     if (!user.roles.includes('rest')) {
         return res.status(401).json({
@@ -111,8 +117,9 @@ router.get('/all_food', async (req, res) => {
 router.post('/food/get', async (req, res) => {
     var lat = req.body.latitude
     var long = req.body.longitude
-    var maxDistance = req.body.maxDistance
+    var maxDistance = req.body.maxDistance * 1609.344
     var budget = req.body.budget
+    var query = req.body.query
 
     
     console.log(lat, long)
@@ -134,6 +141,9 @@ router.post('/food/get', async (req, res) => {
         }
         )
 
+        // console.log("restaurants")
+        // console.log(restaurantIds)
+
 
     var restaurantIds = []
 
@@ -153,9 +163,93 @@ router.post('/food/get', async (req, res) => {
         }
     )
 
-    res.send(allFood)
+    const tags = res.locals.user.tag
+
+    const userPreferences = tags.join(', ')
+
+    // console.log("before call first functiion")
+
+    // console.log(restaurantIds)
+
+    // res.json(allFood)
+
+    await furtherFilterFood(req, res, query, userPreferences, JSON.stringify(allFood), budget)
+    
     
 })
+
+// filters food with the python trained model
+async function furtherFilterFood(req, res, query, userPreferences, allFood, budget) {
+    console.log("accessed")
+    const options = {
+        pythonPath: 'python3',
+        scriptPath: '/home/sreekara/Projects/UpdatedDishFish/server/analysis',
+        args: [query, userPreferences, allFood, budget]
+    }
+
+    PythonShell.run('analysis.py', options, (err, results) => {
+        console.log("in function")
+        if (err) {
+            res.send(err)
+
+        };
+
+    }).then((value) => {
+        console.log(value)
+        res.send(JSON.parse(value[0]))
+    })
+
+    // res.send("exited")
+
+
+    // var spawn = require("child_process").spawn
+
+    // console.log("before call second functiion")
+    
+    // // server/analysis/analysis.py
+    // var process = spawn('python', ['/home/sreekara/Projects/dish-fish/server/analysis/analysis.py'],
+    //                     query, userPreferences, allFood, budget);
+
+    // console.log("after call second functiion")
+    
+    
+    
+    // await process.stdout.on('data', function(data) { 
+    //     console.log("reached")
+    //     console.log(data)
+    //     const buff = Buffer.from(data)
+    //     const json = buff.toJSON()
+    //     console.log(json)
+    //     res.send(json); 
+    // } )
+
+    // process.stderr.on('data', (err) => {
+    //     console.error(err)
+    // })
+
+    // process.on('close', (chunk) => {
+    //     // var textChunk = chunk.toString('utf8');// buffer to string
+
+    //     console.log(chunk)
+    //     var textChunk = chunk.toString('utf8');// buffer to string
+
+    //     console.log("python file closed")
+    //     console.log(Buffer.from(data, 'utf-8').toString())
+    //     res.json( {
+
+    //         not: "good"
+    //     }
+            
+    //     )
+        
+    // })
+
+    // return {
+    //     random: "stuf"
+    // }
+
+
+} 
 
 router.post('/rest/food', async (req, res) => {
     const id = uuid4()
