@@ -6,3 +6,5 @@ app/node_modules
 node_modules
 app/.next
 dish-fish-fdea20db28ac.json
+server/analysis/trained_modelSpecific
+server/analysis/trained_modelSpice
