@@ -29,7 +29,7 @@ const cookieConfig = {
     httpOnly: true,
     secure: false, // enable this true if both server and website are https, otherwise it wont work
     maxAge: 1800,
-    signed: false  
+    signed: false
 }
 
 router.use((req, res, next) => {
@@ -91,8 +91,16 @@ router.use('/rest/*', async (req, res, next) => {
 // })
 
 // Define the home page route
-router.get('/', function(req, res) {
-    res.send('the user default route');
+router.get('/', async (req, res) => {
+    const restaurants = await Food.find({})
+
+    res.send(restaurants);
+});
+
+router.get('/rest/', async (req, res) => {
+    const restaurants = await Restaurant.find({})
+
+    res.send(restaurants);
 });
 
 router.get('/all_food', async (req, res) => {
@@ -149,12 +157,25 @@ router.post('/food/get', async (req, res) => {
     
 })
 
-router.post('/food', async (req, res) => {
+router.post('/rest/food', async (req, res) => {
     const id = uuid4()
     var name = req.body.name
-    var restaurantId = req.body.restaurantId
     var description = req.body.description
     var price = req.body.price
+    var restaurant = req.body.restaurant
+    var calories = req.body.calories
+    var spicy = req.body.spicy
+    var vegetarian = req.body.vegetarian
+    var vegan = req.body.vegan
+    var mealCategory = req.body.mealCategory
+    var cuisine = req.body.cuisine
+
+    const rest = await Restaurant.findOne({
+        name: restaurant
+    })
+
+    var restaurantId = rest.id
+
 
     const newFood = new Food({
         id: id,
@@ -163,17 +184,65 @@ router.post('/food', async (req, res) => {
         description: description,
         price: price,
         bucket: bucketName,
-        pathToFile: restaurantId + '/' + id + ".png"
+        pathToFile: restaurantId + '/' + id + ".png",
+        restaurant: restaurant,
+        calories: calories,
+        spicy: spicy,
+        vegetarian: vegetarian,
+        vegan: vegan,
+        mealCategory: mealCategory,
+        cuisine: cuisine
     })
 
 
     const insertedFood = await newFood.save()
-    console.log(insertedFood)
+    // console.log(insertedFood)
     res.send(insertedFood)
 })
 
+
+// router.put('/rest/food', async (req, res) => {
+//     var name = req.body.name
+//     var description = req.body.description
+//     var price = req.body.price
+//     var restaurant = req.body.restaurant
+//     var calories = req.body.calories
+//     var spicy = req.body.spicy
+//     var vegetarian = req.body.vegetarian
+//     var vegan = req.body.vegan
+//     var mealCategory = req.body.mealCategory
+//     var cuisine = req.body.cuisine
+
+//     const rest = await Restaurant.findOne({
+//         name: restaurant
+//     })
+
+//     var restaurantId = rest.id
+
+
+//     const updatedFood = {
+//         name: name,
+//         restaurantId: restaurantId,
+//         description: description,
+//         price: price,
+//         restaurant: restaurant,
+//         calories: calories,
+//         spicy: spicy,
+//         vegetarian: vegetarian,
+//         vegan: vegan,
+//         mealCategory: mealCategory,
+//         cuisine: cuisine
+//     }
+
+
+//     const insertedFood = await Food.findOneAndUpdate({name: name}, updatedFood)
+//     // console.log(insertedFood)
+//     res.send(insertedFood)
+// })
+
+
 // This is really bad. We are only doing this becuase the # of foods in the database is small, its a hackathon, and we wont need to regenerate hese url's
-router.get('/populate_signed_url_images', async (req, res) => {
+router.get('/rest/populate_signed_url_images', async (req, res) => {
     const allFood = await Food.find({})
     console.log(allFood)
     for (let index = 0; index < allFood.length; index++) {
@@ -192,7 +261,7 @@ router.get('/populate_signed_url_images', async (req, res) => {
     res.send(200)
 })
 
-router.post('/restaurant', async (req, res) => {
+router.post('/create/restaurant', async (req, res) => {
     var id = req.body.id
     var name = req.body.name
     var hours = req.body.hours
