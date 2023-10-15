@@ -39,8 +39,26 @@ router.use((req, res, next) => {
         })
     }
     next()
-
 })
+
+router.use('/rest/*', async (req, res, next) => {
+    const token = req.cookies.token
+
+    const parsedJWT = await jwt.verify(token, process.env.JWT_TOKEN_KEY)
+
+    const user = await User.findOne({
+        id: parsedJWT.id
+    })
+
+    if (!user.roles.includes('rest')) {
+        return res.status(401).json({
+            message: "User is not a restaurant owner."
+        })
+    }
+
+    next()
+})
+
 
 // router.get('/all', async (req, res) => {
 //     const form = new formidable.IncomingForm();
@@ -206,8 +224,11 @@ router.post('/signin', async (req, res) => {
 router.post('/signup', async (req, res) => {
     var username = req.body.username
     var password = req.body.password
-    console.log(username)
-    console.log(password)
+    var role = req.body.role
+
+    console.log("username", username)
+    console.log("password", password)
+    console.log("role", role)
 
     const salt = crypto.randomBytes(16).toString('hex');
     const hash = crypto.pbkdf2Sync(password, salt, 1000, 64, `sha256`).toString(`hex`);
@@ -218,6 +239,7 @@ router.post('/signup', async (req, res) => {
         username: username,
         password: hash,
         salt: salt,
+        roles: [role],
         tag: []
     })
         
@@ -280,13 +302,9 @@ router.post('/addPassivePreferences', async (req, res) => {
 
     // console.log(userID)
     const user = await User.findOne({id: userID})
-
     const tag_list = [...user.tag]
-    console.log("before", tag_list)
 
     await addToList(tag_list, listOfTags)
-
-    console.log("after", tag_list)
 
     user.tag = tag_list
     await user.save()

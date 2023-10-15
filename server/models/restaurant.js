@@ -11,7 +11,6 @@ const RestaurantSchema = new mongoose.Schema({
   }
 })
 
-
 RestaurantSchema.index({ location: "2dsphere" })
 
 const Restaurant = mongoose.model('Restaurant', RestaurantSchema)

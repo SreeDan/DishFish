@@ -6,6 +6,7 @@ const UserSchema = new mongoose.Schema({
   password: String,
   salt: String,
   email: String,
+  roles: [String],
   tag: [String] // put id's here as reference to tags
 })
 
