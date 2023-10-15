@@ -16,8 +16,10 @@ import {
   Stack,
 } from '@chakra-ui/react'
 import { HamburgerIcon, CloseIcon } from '@chakra-ui/icons'
+import Image from 'next/image';
+import Link from 'next/link';
 
-const Links = ['Dashboard', 'Projects', 'Team']
+const Links = []
 
 const NavLink = (props) => {
   const { children } = props
@@ -38,29 +40,31 @@ const NavLink = (props) => {
   )
 }
 
-const Layout = (props) => {
+export default function Layout(props) {
   const { isOpen, onOpen, onClose } = useDisclosure()
 
   return (
     <>
       <Box bg={useColorModeValue('gray.100', 'gray.900')} px={4}>
         <Flex h={16} alignItems={'center'} justifyContent={'space-between'}>
-          <IconButton
+          {/* <IconButton
             size={'md'}
             icon={isOpen ? <CloseIcon /> : <HamburgerIcon />}
             aria-label={'Open Menu'}
             display={{ md: 'none' }}
             onClick={isOpen ? onClose : onOpen}
-          />
+          /> */}
+          <Box>
+            <Image width={10} height={10} src='/app/public/Logo.png'/>
+          </Box>
           <HStack spacing={8} alignItems={'center'}>
-            <Box>Logo</Box>
             <HStack as={'nav'} spacing={4} display={{ base: 'none', md: 'flex' }}>
               {Links.map((link) => (
                 <NavLink key={link}>{link}</NavLink>
               ))}
             </HStack>
           </HStack>
-          <Flex alignItems={'center'}>
+          {/* <Flex alignItems={'center'}>
             <Menu>
               <MenuButton
                 as={Button}
@@ -82,9 +86,13 @@ const Layout = (props) => {
                 <MenuItem>Link 3</MenuItem>
               </MenuList>
             </Menu>
-          </Flex>
+                </Flex> */}
+        <Link href='/user/signin'>
+            <Button>
+                Sign In
+            </Button>
+        </Link>
         </Flex>
-
         {isOpen ? (
           <Box pb={4} display={{ md: 'none' }}>
             <Stack as={'nav'} spacing={4}>
@@ -95,10 +103,6 @@ const Layout = (props) => {
           </Box>
         ) : null}
       </Box>
-
-      <Box p={4}>Main Content Here</Box>
     </>
   )
 }
-
-export default Layout;
