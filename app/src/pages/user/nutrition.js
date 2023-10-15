@@ -1,5 +1,15 @@
 import React from 'react';
 import { Text } from '@chakra-ui/react';
+import {
+  Flex,
+  Heading,
+  Input,
+  Button,
+  Stack,
+  FormLabel,
+  Box,
+  Link
+} from "@chakra-ui/react";
 
 const dailyCalories = [
   { day: 'Sunday', amount: 2000 },
@@ -21,6 +31,7 @@ const NutritionPage = () => {
   const todayCalories = dailyCalories[new Date().getDay()].amount;
   const monthlyCalories = weeklyCalories * 4; // Assuming a month has 4 weeks
 
+
   const ironRichFoods = [
     'Spinach',
     'Red Meat',
@@ -36,6 +47,8 @@ const NutritionPage = () => {
   return (
     <>
     <Text margin={"auto"} padding={"10px"} align={"center"} fontSize={"2rem"}>Nutrition</Text>
+    <Heading margin={"auto"} align={"center"} color="black.400" fontSize={"lg"}>Go to:<Link href="/user/home"><Button margin="8px">Home</Button></Link><Link href="/user/pref"><Button margin="8px">Preferences</Button></Link><Link href="/user/financial"><Button margin="8px">Finances</Button></Link></Heading>
+
 
     <div className="pageContainer" >
       <div className="contentContainer">

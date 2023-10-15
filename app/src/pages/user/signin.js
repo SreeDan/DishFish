@@ -15,6 +15,7 @@ import {
 const SignIn = () => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
+    
     // const [cookies, setCookie] = useCookies(["user"])
 
     const router = useRouter()
@@ -38,7 +39,6 @@ const SignIn = () => {
             } else {
                 // setCookies('token', res.data.token); // your token
                 // setCookies('name', res.data.name); // optional data
-
                 router.push('/user/home')
             }
         })

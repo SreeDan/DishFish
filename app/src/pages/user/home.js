@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from 'react';
+import Result from '../../components/Result';
+
 import {
   Flex,
   Heading,
@@ -6,7 +8,8 @@ import {
   Button,
   Stack,
   FormLabel,
-  Box
+  Box,
+  Link
 } from "@chakra-ui/react";
 import { useRouter } from 'next/router';
 
@@ -15,6 +18,7 @@ const SearchPage = () => {
   const [generalQuery, setGeneralQuery] = useState('');
   const [radiusQuery, setRadiusQuery] = useState('');
   const [isFetched, setIsFetched] = useState(false);
+  const [data, setData] = useState()
   const [location, setLocation] = useState({latitude: null, longitude: null})
 
   useEffect(() => {
@@ -44,7 +48,7 @@ const SearchPage = () => {
   const handleSubmit = (e) => {
       e.preventDefault();
       const requestOptions = {
-        method: 'GET',
+        method: 'POST',
         headers: {'Content-Type': 'application/json'},
         body: JSON.stringify({
           latitude: location.latitude,
@@ -55,20 +59,33 @@ const SearchPage = () => {
         })
       }
       fetch('http://localhost:8080/api/v1/users/food/get', requestOptions)
-        .then((response) => {
+        .then(async (response) => {
             if (!response.ok) {
                 console.log(`HTTP Response Code: ${response.status}`)
             } else {
                 // setCookies('token', res.data.token); // your token
                 // setCookies('name', res.data.name); // optional data
-                router.query = response.body
-                router.push('/results')
+                // router.query = await response.json()
+                const res = await response.json()
+                setData(res)
+                // console.log(res)
+                // router.replace({
+                //   query: { ...router.query, key: res },
+                // });
+                // router.push('/user/results')
+                setIsFetched(true)
+
+                
             }
       })
   }
 
   // make form with Chakra UI with price, radius, and search query
   return (
+    isFetched ?
+    <Result data={data}>
+      </Result>
+      :
     <Flex
         flexDirection="column"
         width="100wh"
@@ -84,6 +101,7 @@ const SearchPage = () => {
         alignItems="center"
     >
     <Heading color="teal.400">Get Fishing!</Heading>
+    <Heading color="black.400" fontSize={"1xl"}>Go to:<Link href="/user/nutrition"><Button margin="8px">Nutrition</Button></Link><Link href="/user/prefs"><Button>Preferences</Button></Link><Link href="/user/financial"><Button margin="8px">Finances</Button></Link></Heading>
 
     <Box minW={{ base: "90%", md: "468px" }}>
       <form onSubmit={handleSubmit}>

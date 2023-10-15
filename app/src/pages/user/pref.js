@@ -1,4 +1,14 @@
 import React, { useState } from 'react';
+import {
+  Flex,
+  Heading,
+  Input,
+  Button,
+  Stack,
+  FormLabel,
+  Box,
+  Link
+} from "@chakra-ui/react";
 
 const PreferencesPage = () => {
   const [inputValue, setInputValue] = useState('');
@@ -18,6 +28,8 @@ const PreferencesPage = () => {
     <div className="pageContainer">
       <div className="contentContainer">
         <h1 className="title">Preferences</h1>
+        <Heading color="black.400" fontSize={"lg"}>Go to:<Link href="/user/home"><Button margin="8px">Home</Button></Link><Link href="/user/nutrition"><Button margin="8px">Nutrition</Button></Link><Link href="/user/financial"><Button margin="8px">Finances</Button></Link></Heading>
+
         <div className="instructions">
           Add preferences in plain English and a comma-separated list using example below.
         </div>

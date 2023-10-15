@@ -1,5 +1,15 @@
 import React from 'react';
 import { Text } from '@chakra-ui/react';
+import {
+  Flex,
+  Heading,
+  Input,
+  Button,
+  Stack,
+  FormLabel,
+  Box,
+  Link
+} from "@chakra-ui/react";
 
 const restaurantExpenses = [
   { day: 'Sunday', amount: 50 },
@@ -24,6 +34,8 @@ const FinancialDataPage = () => {
   return (
     <>
     <Text align={"center"} fontSize={"2rem"}>Financials</Text>
+    <Heading align={"center"} color="black.400" fontSize={"1xl"}>Go to:<Link href="/user/nutrition"><Button margin="8px">Nutrition</Button></Link><Link href="/user/prefs"><Button>Preferences</Button></Link><Link href="/user/home"><Button margin="8px">Home</Button></Link></Heading>
+
     <div className="pageContainer">
       <div className="contentContainer">
         <h1 className="title">Restaurant Expenses</h1>
