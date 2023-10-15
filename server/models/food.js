@@ -6,6 +6,9 @@ const FoodSchema = new mongoose.Schema({
   restaurantId: String,
   description: String,
   price: Number,
+  bucket: String, // GCP Bucket
+  pathToFile: String, // GCP File Name,
+  signedURL: String,
   tag: [Number] // put id's here as reference to tags
 })
 
