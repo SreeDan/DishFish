@@ -20,11 +20,14 @@ import {
   useToast
 } from "@chakra-ui/react";
 
+import { useRouter } from 'next/router'
+
 const SignUp = () => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
     const [role, setRole] = useState('user')
     const toast = useToast()
+    const router = useRouter()
     const handleSubmit = (e) => {
         e.preventDefault();
         console.log(username)
@@ -48,6 +51,7 @@ const SignUp = () => {
                 })    
             }
         })
+        router.push('/user/signin')
     }
 
     return (

@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { redirect } from 'next/navigation'
-import { CookiesProvider, useCookies } from 'react-cookie';
+// import { CookiesProvider, useCookies } from 'react-cookie';
 import { useRouter } from 'next/router'
 import {
   Flex,
@@ -15,7 +15,7 @@ import {
 const SignIn = () => {
     const [username, setUsername] = useState("")
     const [password, setPassword] = useState("")
-    const [cookies, setCookie] = useCookies(["user"])
+    // const [cookies, setCookie] = useCookies(["user"])
 
     const router = useRouter()
 
@@ -36,8 +36,8 @@ const SignIn = () => {
             if (!response.ok) {
                 console.log(`HTTP Response Code: ${response.status}`)
             } else {
-                setCookies('token', res.data.token); // your token
-                setCookies('name', res.data.name); // optional data
+                // setCookies('token', res.data.token); // your token
+                // setCookies('name', res.data.name); // optional data
 
                 router.push('/user/home')
             }
