@@ -1,6 +1,5 @@
 // import { NextRequest, NextResponse } from 'next/server'
 
-
 const { User } = require( '../models/user');
 // define routes here
 // const connectDB = require('../db/conn')
@@ -9,15 +8,22 @@ const express = require('express');
 const basicAuth = require('express-basic-auth')
 const {Storage} = require('@google-cloud/storage');
 const formidable = require('formidable')
-
-
 const jwt = require('jsonwebtoken');
 const uuid4 = require('uuid4');
 const { Restaurant } = require('../models/restaurant');
 const { Food } = require('../models/food');
+const path = require('node:path'); 
 var router = express.Router();
-const storage = new Storage(); // GCP Storage
+const dotenv = require('dotenv')
 
+dotenv.config()
+
+const storage = new Storage({
+    keyFilename: path.join(__dirname, "../../dish-fish-fdea20db28ac.json"),
+    projectId: 'dish-fish'
+}); // GCP Storage
+
+const bucketName = process.env.GCP_BUCKET || '';
 
 const cookieConfig = {
     httpOnly: true,
@@ -72,7 +78,7 @@ router.get('/', function(req, res) {
 });
 
 router.get('/all_food', async (req, res) => {
-    const food = await Food.get({})
+    const food = await Food.find({})
     res.send(food)
 })
 
@@ -115,6 +121,9 @@ router.post('/food/get', async (req, res) => {
                 $in: restaurantIds
             },
             price: { $lte: budget }
+        },
+        {
+            bucket: 0, pathToFile: 0
         }
     )
 
@@ -134,14 +143,36 @@ router.post('/food', async (req, res) => {
         name: name,
         restaurantId: restaurantId,
         description: description,
-        price: price
+        price: price,
+        bucket: bucketName,
+        pathToFile: restaurantId + '/' + id + ".png"
     })
+
 
     const insertedFood = await newFood.save()
     console.log(insertedFood)
     res.send(insertedFood)
 })
 
+// This is really bad. We are only doing this becuase the # of foods in the database is small, its a hackathon, and we wont need to regenerate hese url's
+router.get('/populate_signed_url_images', async (req, res) => {
+    const allFood = await Food.find({})
+    console.log(allFood)
+    for (let index = 0; index < allFood.length; index++) {
+        const food = allFood[index]
+        console.log(index)
+        if (food.signedURL === undefined) {
+            console.log("before gen")
+            const url = await generateV4ReadSignedUrl(food.bucket, food.pathToFile)
+            console.log("after gen")
+            console.log(food.pathToFile)
+            food.signedURL = url
+            await food.save()
+        }
+    }
+
+    res.send(200)
+})
 
 router.post('/restaurant', async (req, res) => {
     var id = req.body.id
@@ -247,5 +278,21 @@ function isCorrectPassword(correctPassword, inputtedPassword, salt) {
     hashedInput = crypto.pbkdf2Sync(inputtedPassword, salt, 1000, 64, `sha256`).toString(`hex`)
     return hashedInput == correctPassword
 }
+
+async function generateV4ReadSignedUrl(bucket, filePath) {
+    const options = {
+      version: 'v4',
+      action: 'read',
+      expires: Date.now() + 60 * 60 * 1000, // 15 minutes
+    };
+
+    // Get a v4 signed URL for reading the file
+    const [url] = await storage
+      .bucket(bucket)
+      .file(filePath)
+      .getSignedUrl(options);
+  
+    return url
+  }
 
 module.exports = router;
